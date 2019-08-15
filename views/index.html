@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>FARM MANAGEMENT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="index.css" >
+  </head>
+  <body>
+    <div id="wrap">
+      <table>
+        <tr>
+          <td id="headerLeft">
+            &nbsp;&nbsp;&nbsp;<img id="logo" src="KWUni.png">
+          </td>
+          <td id="headerRight">
+            <img id="logout" src="Logout.png">&nbsp;&nbsp;&nbsp;
+          </td>
+        </tr>
+      </table>
+    </div>
+    <ul>
+      <li><a href="#main">메인 화면</a></li>
+      <li><a href="#control">제어 화면</a></li>
+    </ul>
+    <div id='nongjang'>
+      <table>
+        <tr>
+          <td class="nongjangTD"></td>
+          <td class="nongjangTD"></td>
+          <td class="nongjangTD" id="nongjangName">김명득님 농장<br>(1동)</td>
+        </tr>  
+      </table>
+    </div>
+    <div id="mainScreen">
+      <table>
+        <tr>
+          <td class="mainValues">목표온도<br>21.0˚C</td>
+          <td class="mainValues">내부온도<br>23.0˚C</td>
+          <td class="mainValues">설정편차<br>3.0˚C</td>
+        </tr>
+        <tr>
+          <td class="mainValues">상대습도<br>65%</td>
+          <td class="mainValues">환기 계산값<br>75%<br>(4500CMH)</td>
+          <td class="mainValues">환기 계산값<br>75%<br>(4500CMH)</td>
+        </tr>  
+      </table>
+      <table>
+        <tr>
+          <td id="controlsangtae" colspan="2">제어 상태</td>
+        </tr>
+        <tr>
+          <td class="controlElement">
+            <div><table><tr>
+              <td class="controlTitle">환기</td>
+              <td class="switch">
+                자동<img id="fanSwitch" class="switchPic" src="switchAuto.png">수동
+              </td></tr></table>
+            </div>
+            팬1<img id="fanPic1" class="controlPic" src="fan.png">&nbsp;&nbsp;&nbsp;&nbsp;
+            팬2<img id="fanPic2" class="controlPic" src="fan.png">&nbsp;&nbsp;&nbsp;&nbsp;
+            팬3<img id="fanPic3" class="controlPic" src="fan.png">
+          </td>
+          <td class="controlElement">
+            <div>
+              <table><tr>
+                <td class="controlTitle">급수</td>
+                <td class="switch">
+                  자동<img id="waterSwitch" class="switchPic" src="switchAuto.png">
+                  수동
+                </td>  
+              </tr></table>
+              </div>
+            <img id="waterPic" class="controlPic" src="drop.png">
+          </td>
+        </tr>
+      </table>
+    </div>
+ </body>
+</html>
