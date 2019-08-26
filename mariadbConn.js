@@ -8,26 +8,35 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
-async function insertData(farmInfo){
+async function insertData(dataBean){
     let conn;
-
     try{
-        var house1 = {t1:0, t2:0, h1:0, h2:0, houseTime:"no data"};
-        var house2 = {t1:0, t2:0, h1:0, h2:0, houseTime:"no data"};
-        var house = [house1, house2];
-
-        for(i=0;i<2;i++){
-            house[i].t1   = farmInfo[i].temperature1;
-            house[i].t2   = farmInfo[i].temperature2;
-            house[i].h1   = farmInfo[i].humidity1;
-            house[i].h2   = farmInfo[i].humidity2;
-            house[i].houseTime   = timeConv.convertToTime(farmInfo[i].sigTime)
-        }
-
         conn = await pool.getConnection();
         conn.query('USE farmData');
-        conn.query('INSERT INTO House1(temp1, temp2, humid1, humid2, msgTime) VALUES(?,?,?,?,?)',[house[0].t1,house[0].t2,house[0].h1,house[0].h2,house[0].houseTime]);
-        conn.query('INSERT INTO House2(temp1, temp2, humid1, humid2, msgTime) VALUES(?,?,?,?,?)',[house[1].t1,house[1].t2,house[1].h1,house[1].h2,house[1].houseTime]);
+        var sql1 = 'INSERT INTO House1(msgTime, tarTemp, tempBand, ventilPer, '+
+        'temp1, temp2, humid1, humid2, fanMode, fan1, fan2, fan3, waterMode, '+
+        'water, alarm) VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        var sql2 = 'INSERT INTO House2(msgTime, tarTemp, tempBand, ventilPer, '+
+        'temp1, temp2, humid1, humid2, fanMode, fan1, fan2, fan3, waterMode, '+
+        'water, alarm) VALUES( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        var sql = [sql1, sql2];
+        for(i=0;i<2;i++){
+            var convertedTime = "";
+            if(dataBean.house[i].msgTime == '-'){
+                convertedTime = "no data";    
+            }else{
+                convertedTime = timeConv.convertToTime(dataBean.house[i].msgTime);
+            }
+            conn.query(sql[i],
+                [convertedTime, dataBean.house[i].tarTemp, 
+                dataBean.house[i].tempBand, dataBean.house[i].ventilPer, 
+                dataBean.house[i].temp1, dataBean.house[i].temp2, 
+                dataBean.house[i].humid1, dataBean.house[i].humid2, 
+                dataBean.house[i].fanMode, dataBean.house[i].fan1, 
+                dataBean.house[i].fan2, dataBean.house[i].fan3, 
+                dataBean.house[i].waterMode, dataBean.house[i].water, 
+                dataBean.house[i].alarm]);
+        }
     }catch(err){
         console.log(err);
     }finally{
@@ -35,23 +44,24 @@ async function insertData(farmInfo){
     }
 }
 
-async function selectData(param, house){
+async function selectData(house){
     let conn, result;
-    var sql = 'SELECT '+param+' FROM '+house+' ORDER BY num LIMIT 1';
+    var sql = 'SELECT * FROM '+house+' ORDER BY num DESC LIMIT 1';
     try{
         conn = await pool.getConnection();
         await conn.query('USE farmData');
         result = await conn.query(sql);
+        // return result;
         // console.log(result[0].temp1);
     }catch(err){
         console.log(err);
     }finally{
         if(conn) conn.end();
         // console.log('connection ended.');
-        // return result;
+        console.log(result[0].temp1);
+        return result;
     }
     // console.log(result[0].temp1);
-    return result[0].temp1;
 }
 
 module.exports = {

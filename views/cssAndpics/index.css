@@ -20,29 +20,40 @@ table{
 #logo{
   width: 30%;
 }
-#logout{
-  width: 15%;
+#farmNetLogo{
+  width: 50%;
 }
-ul{
+.container{
   width: 100%;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  background-color: #333;
+  margin: 0 auto; 
 }
-li{
-  float: left;
+
+ul.tabs{
+  width: 100%;
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+  background-color: #000066;
 }
-li a{
-  display: block;
+ul.tabs li{
+  background: none;
+  color:white;
+  display: inline-block;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+ul.tabs li.current{
+  background: #6699ff;
   color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: none;
 }
-li a:hover:not(.active){
-  background-color: #4CAF50;
+
+.tab-content{
+  display:none;
+  /* padding: 15px; */
+}
+.tab-content.current{
+  display: inherit;
 }
 #nongjang{
   width: 100%;
@@ -74,7 +85,7 @@ li a:hover:not(.active){
   width: 100%;
   padding: 14px 16px;
   text-align: center;
-  background-color: #333;
+  background-color: #000066;
   color: white;
 }
 .controlElement{
