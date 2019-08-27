@@ -21,7 +21,28 @@ app.get('/', function(req,res){
 //프런트에서 getData.do 요청이 오면, 응답으로 데이터빈을 보냄. 
 app.post('/getData.do', function(req,res){
     console.log('getData.do request received.');
-    console.log(req.body.userData);
+    if(req.body.userData.userData1.fanMode == 1){
+        dataBean.house[0].fanMode   = req.body.userData.userData1.fanMode;
+        dataBean.house[0].fan1      = req.body.userData.userData1.fan1;
+        dataBean.house[0].fan2      = req.body.userData.userData1.fan2;
+        dataBean.house[0].fan3      = req.body.userData.userData1.fan3;
+    }
+
+    if(req.body.userData.userData2.fanMode == 1){
+        dataBean.house[1].fanMode   = req.body.userData.userData2.fanMode;
+        dataBean.house[1].fan1      = req.body.userData.userData2.fan1;
+        dataBean.house[1].fan2      = req.body.userData.userData2.fan2;
+        dataBean.house[1].fan3      = req.body.userData.userData2.fan3;
+    }
+
+    if(req.body.userData.userData1.waterMode == 1){
+        dataBean.house[0].waterMode = req.body.userData.userData1.waterMode;
+        dataBean.house[0].water     = req.body.userData.userData1.water;
+    }
+    if(req.body.userData.userData2.waterMode == 1){
+        dataBean.house[1].waterMode = req.body.userData.userData2.waterMode;
+        dataBean.house[1].water     = req.body.userData.userData2.water;
+    }
     res.send(dataBean);
 });
 

@@ -101,8 +101,13 @@ ul.tabs li.current{
   border-radius: 20px;
 }
 .controlPic{
+  width: 80%;
+}
+
+#waterPic{
   width: 20%;
 }
+
 .switch{
   width: 70%;
 }
@@ -110,9 +115,7 @@ ul.tabs li.current{
   width: 30%;
   height: 10%;
 }
-.controlPic{
-  width: 20%;
-}
+
 @media only screen and (max-width:600px){
   /* for mobile phone */
   body{
