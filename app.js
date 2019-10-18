@@ -115,6 +115,7 @@ socketServer.on("connection", function(socket){
             }
         }
         console.log('controlData will be sent to the gateWay.');
+        console.log(dataBean.house[0].temp1);
         socket.emit('controlData', dataBean);
     }); 
 });

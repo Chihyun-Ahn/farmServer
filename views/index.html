@@ -195,7 +195,7 @@
         var userData = {userData1: userData1, userData2: userData2};
         console.log(userData1.fanMode);
         setInterval(()=>{
-          $.post("http://223.194.33.65:5000/getData.do",{userData: userData},(dataBean)=>{
+          $.post("http://223.194.33.87:5000/getData.do",{userData: userData},(dataBean)=>{
             
             if(houseNum == '0'){console.log('동번호를 선택하세요.');}else{
               var avgTemp  = dataBean.house[houseNum-1].avgTemp;
