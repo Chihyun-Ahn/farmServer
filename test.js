@@ -1,14 +1,54 @@
-var house1 = {
-    num: 0, curTime: "", msgTime: "", tarTemp: 0, tempBand: 0, ventilPer: -99,
-    temp1: 0, temp2: 0, humid1: 0, humid2: 0, fanMode: "", fan1: "", fan2: "", fan3: "",
-    doseMode: "", feed: "", water: "",alarm: ""
-};
-var house2 = {
-    num: 0, curTime: "", msgTime: "", tarTemp: 0, tempBand: 0, ventilPer: -99,
-    temp1: 0, temp2: 0, humid1: 0, humid2: 0, fanMode: "", fan1: "", fan2: "", fan3: "",
-    doseMode: "", feed: "", water: "",alarm: ""
-};
+for(i=0;i<1000;i++){
+    var x = getCurrentTime();
+    console.log(x);
+}
 
-var houseData = [house1, house2];
+function convertToTime(intTime){
+    var nowTime = new Date(intTime);
+    var year = nowTime.getFullYear();
+    var month = nowTime.getMonth()+1;
+    var date = nowTime.getDate();
+    var hour = nowTime.getHours();
+    var min = nowTime.getMinutes();
+    var sec = nowTime.getSeconds();
+    var milliSec = nowTime.getMilliseconds();
 
-console.log(houseData[0].num);
+    month       = addZero(month);
+    date        = addZero(date);
+    hour        = addZero(hour);
+    min         = addZero(min);
+    sec         = addZero(sec);
+    milliSec    = addZeroMilli(milliSec);
+
+    var returnString = year+"/"+month+"/"+date+"/"+hour+":"+min+":"+sec+":"+milliSec;
+    
+    return returnString; 
+}
+
+function getCurrentTime(){
+    var now = (new Date()) * 1;
+    var result = convertToTime(now);
+    return result;
+}
+
+function addZero(num){
+    var x = "";
+    if(num < 10){
+        x = "0"+num;
+    }else{
+        x = ""+num;
+    }
+    return x;
+}
+
+function addZeroMilli(num){
+    var x = "";
+    if(num < 10){
+        x = "00"+num;
+    }else if(num >= 10 && num < 100){
+        x = "0"+num;
+    }else{
+        x = ""+num;
+    }
+    return x;
+}

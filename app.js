@@ -65,55 +65,59 @@ app.listen(5000, function(){
 socketServer.on("connection", function(socket){
     console.log('user connected');
 
-    //농장 서버에다가 매 20초마다 'giveMeData'요청을 보낸다. 
-    setInterval(()=>{
-        socket.emit('giveMeData');
-    }, 10000);
+    // //농장 서버에다가 매 20초마다 'giveMeData'요청을 보낸다. 
+    // setInterval(()=>{
+    //     socket.emit('giveMeData');
+    // }, 10000);
 
     //농장 서버에서 giveMeData 요청에 대한 응답으로 농장 센서 데이터값을 보내온다. 
-    socket.on('farmInfo',(farmInfo)=>{
-        console.log('farmInfo received. current time: '+ new Date());
+    socket.on('house',(house)=>{
+        console.log('House data received. current time: '+ new Date());
         // 데이터빈에 저장한다. 
         for(i=0;i<2;i++){
-            dataBean.house[i].temp1     = farmInfo[i].temperature1;
-            dataBean.house[i].temp2     = farmInfo[i].temperature2;
-            dataBean.house[i].avgTemp   = Math.round((farmInfo[i].temperature1 + farmInfo[i].temperature2)/2);
-            dataBean.house[i].humid1    = farmInfo[i].humidity1;
-            dataBean.house[i].humid2    = farmInfo[i].humidity2;
-            dataBean.house[i].avgHumid  = Math.round((farmInfo[i].humidity1 + farmInfo[i].humidity2)/2);
-            dataBean.house[i].msgTime   = farmInfo[i].sigTime;
-
-            // 환기량 계산 후 팬 가동
+            //온도, 습도, 메세지 시간 데이터빈에 저장
+            for(j=0;j<6;j++){
+                dataBean.house[i].temp[j] = house[i].temperature[j];
+                dataBean.house[i].humid[j] = house[i].humidity[j];
+                dataBean.house[i].avgTemp += house[i].temperature[j];
+                dataBean.house[i].avgHumid += house[i].humidity[j];
+            }
+            dataBean.house[i].avgTemp = Math.round(dataBean.house[i].avgTemp / 6);
+            dataBean.house[i].avgHumid = Math.round(dataBean.house[i].avgHumid / 6);
+            for(j=0;j<2;j++){
+                dataBean.house[i].msgTime[j] = house[i].sigTime[j];
+            }
+            //환기량 계산 후 팬 가동
             dataBean.house[i].ventilPer = Math.round(((dataBean.house[i].avgTemp - dataBean.house[i].tarTemp)/dataBean.house[i].tempBand)*100);
             if(dataBean.house[i].fanMode == 0){
                 if(dataBean.house[i].ventilPer < 33){
-                    dataBean.house[i].fan1 = 1;
-                    dataBean.house[i].fan2 = 0;
-                    dataBean.house[i].fan3 = 0;
+                    dataBean.house[i].fan[0] = 1;
+                    dataBean.house[i].fan[1] = 0;
+                    dataBean.house[i].fan[2] = 0;
                 }else if(dataBean.house[i].ventilPer >= 33 && dataBean.house[i].ventilPer < 66){
-                    dataBean.house[i].fan1 = 1;
-                    dataBean.house[i].fan2 = 1;
-                    dataBean.house[i].fan3 = 0;
+                    dataBean.house[i].fan[0] = 1;
+                    dataBean.house[i].fan[1] = 1;
+                    dataBean.house[i].fan[2] = 0;
                 }else if(dataBean.house[i].ventilPer >= 66){
-                    dataBean.house[i].fan1 = 1;
-                    dataBean.house[i].fan2 = 1;
-                    dataBean.house[i].fan3 = 1;
-                    //고온 알람
-                    if(dataBean.house[i].ventilPer > 120){
-                        dataBean.house[i].alarm = 1;
-                    }
-                }    
+                    dataBean.house[i].fan[0] = 1;
+                    dataBean.house[i].fan[1] = 1;
+                    dataBean.house[i].fan[2] = 1;
+                }
             }
-        
-            // 습도에 따른 가습기 제어
+            //고온 알람
+            if(dataBean.house[i].ventilPer > 120){
+                dataBean.house[i].alarm = 1;
+            }
+            //습도에 따른 가습기 제어
             if(dataBean.house[i].waterMode == 0){
-                if(dataBean.house[i].avgHumid < 70){
-                    dataBean.house[i].water = 0;
-                }else if(dataBean.house[i].avgHumid >= 70){
+                if(dataBean.house[i].avgHumid < 55){
                     dataBean.house[i].water = 1;
+                }else if(dataBean.house[i].avgHumid >= 70){
+                    dataBean.house[i].water = 0;
                 }
             }
         }
+        
         console.log('controlData will be sent to the gateWay.');
         console.log(dataBean.house[0].temp1);
         socket.emit('controlData', dataBean);
