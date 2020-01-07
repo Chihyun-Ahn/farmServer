@@ -3,6 +3,7 @@ var path            = require('path');
 var bodyParser      = require('body-parser');
 var app             = express();
 var dbConn          = require('./mariadbConn');
+var timeConv        = require('./timeConvert');
 
 //전역 변수로 데이터빈 객체 사용
 var dataBean        = require('./dataBean');
@@ -72,9 +73,17 @@ socketServer.on("connection", function(socket){
 
     //농장 서버에서 giveMeData 요청에 대한 응답으로 농장 센서 데이터값을 보내온다. 
     socket.on('house',(house)=>{
+        // 메세지 받은 시각을 데이터빈에 기록
+        var arrTime = timeConv.getCurrentTime();
         console.log('House data received. current time: '+ new Date());
         // 데이터빈에 저장한다. 
         for(i=0;i<2;i++){
+            //메세지 시각 기록
+            dataBean.house[i].arrTime = arrTime;
+            for(j=0;j<2;j++){
+                dataBean.house[i].msgTime[j] = house[i].sigTime[j];
+            }
+            
             //온도, 습도, 메세지 시간 데이터빈에 저장
             for(j=0;j<6;j++){
                 dataBean.house[i].temp[j] = house[i].temperature[j];
@@ -84,9 +93,7 @@ socketServer.on("connection", function(socket){
             }
             dataBean.house[i].avgTemp = Math.round(dataBean.house[i].avgTemp / 6);
             dataBean.house[i].avgHumid = Math.round(dataBean.house[i].avgHumid / 6);
-            for(j=0;j<2;j++){
-                dataBean.house[i].msgTime[j] = house[i].sigTime[j];
-            }
+    
             //환기량 계산 후 팬 가동
             dataBean.house[i].ventilPer = Math.round(((dataBean.house[i].avgTemp - dataBean.house[i].tarTemp)/dataBean.house[i].tempBand)*100);
             if(dataBean.house[i].fanMode == 0){
@@ -117,7 +124,11 @@ socketServer.on("connection", function(socket){
                 }
             }
         }
-        
+        dbConn.insertData(dataBean).catch(
+            (err)=>{
+                console.log(err);
+            }
+        );
         console.log('controlData will be sent to the gateWay.');
         console.log(dataBean.house[0].temp1);
         socket.emit('controlData', dataBean);
@@ -125,12 +136,12 @@ socketServer.on("connection", function(socket){
 });
 
 //매 1분마다 DB에 데이터빈 값을 저장한다. 
-setInterval(()=>{
-    dbConn.insertData(dataBean).catch(
-        (err) =>{
-            console.log(err);
-        }
-    );
+// setInterval(()=>{
+//     dbConn.insertData(dataBean).catch(
+//         (err) =>{
+//             console.log(err);
+//         }
+//     );
     // dbConn.selectData('house1').catch(
     //     (err) => {
     //         console.log(err);
@@ -140,4 +151,4 @@ setInterval(()=>{
         
     //     console.log(result[0].temp1);
     // });
-},5000);
+// },5000);

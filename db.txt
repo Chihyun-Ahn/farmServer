@@ -72,6 +72,16 @@ CREATE TABLE House2(
     alarm		    TINYINT(1)
 );
 
+INSERT INTO House1(msgTimeTemp, msgTimeHumid, arrTime, tarTemp,
+        tempBand, ventilPer, temp1, temp2, temp3, temp4, temp5, temp6, avgTemp,
+        humid1, humid2, humid3, humid4, humid5, humid6, avgHumid, fanMode,
+        fan1, fan2, fan3, waterMode, water, alarm) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+
+INSERT INTO House1(msgTimeTemp, msgTimeHumid) VALUES("-", "-");
+
+
+
+
 
 INSERT INTO House1(tarTemp, tempBand) 
 VALUES(
