@@ -47,6 +47,31 @@ async function insertData(dataBean){
     }
 }
 
+async function loginQuery(id, pw){
+    let conn, result, resultValue;
+    var sql = 'SELECT id, password FROM identification WHERE id = ?';
+    try{
+        conn = await pool.getConnection();
+        await conn.query('Use farmData');
+        result = await conn.query(sql, id);
+    }catch(err){
+        console.log(err)
+    }finally{
+        if(conn) conn.end();
+        if(result[0] == null){ //해당 일치 아이디가 없을 경우
+            resultValue = 'No id';
+        }else if(result[0].password != pw){ //아이디는 일치, 비밀번호 불일치
+            resultValue = 'Wrong password';
+        }else if(result[0].password == pw){ //아이디, 비밀번호 모두 일치
+            resultValue = {id: result[0].id, pw: result[0].password};
+        }else{
+            resultValue = 'Error. etc.';
+        }
+        return resultValue;
+    }
+}
+
+
 async function selectData(house){
     let conn, result;
     var sql = 'SELECT * FROM '+house+' ORDER BY num DESC LIMIT 1';
@@ -69,5 +94,6 @@ async function selectData(house){
 
 module.exports = {
     insertData: insertData,
-    selectData: selectData
+    selectData: selectData,
+    loginQuery: loginQuery
 };

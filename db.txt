@@ -1,6 +1,7 @@
 Install mariadb for windows. then run it in cmd.
 
-mysql -u root -p
+mysql -u root -p  //4581
+mysql -u admin -p  //1234
 
 CREATE DATABASE farmData;
 USE farmData;
@@ -11,66 +12,38 @@ DROP TABLE House2;
 CREATE TABLE House1(
     num         	INT PRIMARY KEY AUTO_INCREMENT,
     curTime         TIMESTAMP DEFAULT NOW(),
-    msgTimeTemp     VARCHAR(25),
-    msgTimeHumid    VARCHAR(25),
-    arrTime         VARCHAR(25),
+    msgTime         VARCHAR(25),
     tarTemp	        DECIMAL(4,1),
     tempBand	    DECIMAL(3,1),
     ventilPer	    DECIMAL(4,1),
-    temp1	       	DECIMAL(4,1),
-    temp2	       	DECIMAL(4,1),
-    temp3	       	DECIMAL(4,1),
-    temp4	       	DECIMAL(4,1),
-    temp5	       	DECIMAL(4,1),
-    temp6	       	DECIMAL(4,1),
     avgTemp         DECIMAL(4,1),
-    humid1       	DECIMAL(4,1),
-    humid2       	DECIMAL(4,1),
-    humid3       	DECIMAL(4,1),
-    humid4       	DECIMAL(4,1),
-    humid5       	DECIMAL(4,1),
-    humid6       	DECIMAL(4,1),
-    avgHumid        DECIMAL(4,1),
-    fanMode	        TINYINT(1),
-    fan1		    TINYINT(1),
-    fan2		    TINYINT(1),
-    fan3		    TINYINT(1),
-    waterMode	    TINYINT(1),
-    water		    TINYINT(1),
-    alarm		    TINYINT(1)
+    avgHumid        DECIMAL(4,1)
 );
 
 CREATE TABLE House2(
     num         	INT PRIMARY KEY AUTO_INCREMENT,
     curTime         TIMESTAMP DEFAULT NOW(),
-    msgTimeTemp     VARCHAR(25),
-    msgTimeHumid    VARCHAR(25),
-    arrTime         VARCHAR(25),
+    msgTime         VARCHAR(25),
     tarTemp	        DECIMAL(4,1),
     tempBand	    DECIMAL(3,1),
     ventilPer	    DECIMAL(4,1),
-    temp1	       	DECIMAL(4,1),
-    temp2	       	DECIMAL(4,1),
-    temp3	       	DECIMAL(4,1),
-    temp4	       	DECIMAL(4,1),
-    temp5	       	DECIMAL(4,1),
-    temp6	       	DECIMAL(4,1),
     avgTemp         DECIMAL(4,1),
-    humid1       	DECIMAL(4,1),
-    humid2       	DECIMAL(4,1),
-    humid3       	DECIMAL(4,1),
-    humid4       	DECIMAL(4,1),
-    humid5       	DECIMAL(4,1),
-    humid6       	DECIMAL(4,1),
-    avgHumid        DECIMAL(4,1),
-    fanMode	        TINYINT(1),
-    fan1		    TINYINT(1),
-    fan2		    TINYINT(1),
-    fan3		    TINYINT(1),
-    waterMode	    TINYINT(1),
-    water		    TINYINT(1),
-    alarm		    TINYINT(1)
+    avgHumid        DECIMAL(4,1)
 );
+
+CREATE TABLE identification(
+    num         	INT PRIMARY KEY AUTO_INCREMENT,
+    id              VARCHAR(25),
+    password        VARCHAR(25),
+    phoneNum        VARCHAR(25),
+    address         VARCHAR(50)
+);
+
+INSERT INTO identification(id, password, phoneNum, address) VALUES('abcd1', '1234', '010-0000-0000', '00-00, Cheolwon-gun, Gangwon-do');
+INSERT INTO identification(id, password, phoneNum, address) VALUES('abcd12', '1234', '010-0000-0001', '00-01, Pocheon-si, Gyeonggi-do');
+INSERT INTO identification(id, password, phoneNum, address) VALUES('abcd123', '1234', '010-0000-0002', '00-02, Paju-si, Gyeonggi-do');
+INSERT INTO identification(id, password, phoneNum, address) VALUES('abcd13', '1234', '010-0000-0003', '00-03, Hwacheon-gun, Gangwon-do');
+INSERT INTO identification(id, password, phoneNum, address) VALUES('abcd134', '1234', '010-0000-0004', '00-04, Jincheon-gun, Chungcheongbuk-do');
 
 INSERT INTO House1(msgTimeTemp, msgTimeHumid, arrTime, tarTemp,
         tempBand, ventilPer, temp1, temp2, temp3, temp4, temp5, temp6, avgTemp,
@@ -78,10 +51,6 @@ INSERT INTO House1(msgTimeTemp, msgTimeHumid, arrTime, tarTemp,
         fan1, fan2, fan3, waterMode, water, alarm) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 
 INSERT INTO House1(msgTimeTemp, msgTimeHumid) VALUES("-", "-");
-
-
-
-
 
 INSERT INTO House1(tarTemp, tempBand) 
 VALUES(
@@ -91,7 +60,9 @@ VALUES(
 SHOW tables;
 SHOW DATABASES;
 
+SELECT user();
 CREATE USER admin@localhost IDENTIFIED BY '1234';
+SELECT host, user, password FROM mysql.user;
 GRANT ALL PRIVILEGES ON farmData.* TO admin@localhost IDENTIFIED BY '1234';
 
 SELECT * FROM House1 ORDER BY num LIMIT 1;
@@ -99,45 +70,3 @@ SELECT * FROM House1 ORDER BY num LIMIT 1;
 DELETE FROM House1;
 ALTER TABLE House1 AUTO_INCREMENT=1;
 
-CREATE TABLE House3(
-    num         	INT PRIMARY KEY AUTO_INCREMENT,
-    curTime         TIMESTAMP DEFAULT NOW(),
-    msgTime         VARCHAR(20),
-    tarTemp	        DECIMAL(4,1),
-    tempBand	    DECIMAL(3,1),
-    ventilPer	    DECIMAL(4,1),	
-    temp1	       	DECIMAL(4,1),
-    temp2	       	DECIMAL(4,1),
-    humid1       	DECIMAL(4,1),
-    humid2       	DECIMAL(4,1),
-    fanMode	        TINYINT(1),
-    fan1		    TINYINT(1),
-    fan2		    TINYINT(1),
-    fan3		    TINYINT(1),
-    doseMode	    TINYINT(1),
-    feed		    TINYINT(1),
-    water		    TINYINT(1),
-    alarm		    TINYINT(1)
-);
-
---------------edge-cloud DB----------------
-
-CREATE TABLE cloudHouse1(
-    num         	INT PRIMARY KEY AUTO_INCREMENT,
-    curTime         TIMESTAMP DEFAULT NOW(),
-    msgTime         VARCHAR(20),
-    tarTemp	        DECIMAL(4,1),
-    tempBand	    DECIMAL(3,1),
-    ventilPer	    DECIMAL(4,1),
-    temp1	       	DECIMAL(4,1),
-    temp2	       	DECIMAL(4,1),
-    humid1       	DECIMAL(4,1),
-    humid2       	DECIMAL(4,1),
-    fanMode	        TINYINT(1),
-    fan1		    TINYINT(1),
-    fan2		    TINYINT(1),
-    fan3		    TINYINT(1),
-    waterMode	    TINYINT(1),
-    water		    TINYINT(1),
-    alarm		    TINYINT(1)
-);
