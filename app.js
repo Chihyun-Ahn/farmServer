@@ -16,7 +16,7 @@ app.use(express.static('views/cssAndpics'));
 
 app.get('/', function(req,res){
     console.log("Get request arrived. index.html is sent.");
-    res.sendFile(path.join(__dirname,'views','index.html'));
+    res.sendFile(path.join(__dirname,'views','indexOld.html'));
 });
 
 //프런트에서 getData.do 요청이 오면, 응답으로 데이터빈을 보냄. 
@@ -54,7 +54,7 @@ app.post('/setData.do', function(req,res){
     dataBean.house[0].tempBand  = req.body.house1TempBand;
     dataBean.house[1].tarTemp   = req.body.house2TarTemp;
     dataBean.house[1].tempBand  = req.body.house2TempBand;
-    res.sendFile(path.join(__dirname,'views','index.html'));
+    res.sendFile(path.join(__dirname,'views','indexOld.html'));
 });
 
 //웹 서버 리스너

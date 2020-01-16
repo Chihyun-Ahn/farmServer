@@ -22,7 +22,14 @@ cloudApp.get('/', function(req, res){
 
 cloudApp.get('/ddd.do', function(req, res){
     console.log('==============');
-    res.redirect('/dddd.do');
+    // res.redirect('/dddd.do');
+    res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
+});
+
+cloudApp.post('/setData.do', function(req, res){
+    console.log('setData.do. requested.');
+    res.redirect(fogAddress+'/realdata.do');
+    // res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
 });
 
 cloudApp.get('/dddd.do', function(req, res){
@@ -36,18 +43,26 @@ cloudApp.get('/login.do', function(req, res){
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
+cloudApp.get('/loginClick.do', function(req, res){
+    console.log('loginClick get request arrived.');
+});
+
 cloudApp.post('/loginClick.do', function(req, res){
     console.log('Log-in button was clicked.');
-    var id = req.body.id;
-    var pw = req.body.pw;
+    var id = req.body.logID;
+    var pw = req.body.password;
+    console.log('id: '+id, 'pw: '+pw);
+    console.log(req.body);
 
     dbConn.loginQuery(id, pw).then(function(resultValue){
         if(resultValue == 'No id' || resultValue == 'Wrong password'){
             console.log('아이디/비밀번호가 일치하지 않습니다.');
-            res.send(resultValue);
+            res.sendFile(path.join(__dirname, 'views', 'index.html'));
+            // res.send(resultValue);
         }else{
             console.log(resultValue.id+'님 환영합니다. ');
-            res.send('clear');
+            res.redirect(fogAddress+'/realdata.do?user='+resultValue.id);
+            // res.send('clear');
         }
     });
 });
