@@ -20,11 +20,11 @@ cloudApp.get('/', function(req, res){
     res.redirect('/login.do');
 });
 
-cloudApp.get('/ddd.do', function(req, res){
-    console.log('==============');
-    // res.redirect('/dddd.do');
-    res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
-});
+// cloudApp.get('/ddd.do', function(req, res){
+//     console.log('==============');
+//     // res.redirect('/dddd.do');
+//     res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
+// });
 
 cloudApp.post('/setData.do', function(req, res){
     console.log('setData.do. requested.');
@@ -32,10 +32,10 @@ cloudApp.post('/setData.do', function(req, res){
     // res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
 });
 
-cloudApp.get('/dddd.do', function(req, res){
-    console.log('######========');
-    res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
-});
+// cloudApp.get('/dddd.do', function(req, res){
+//     console.log('######========');
+//     res.sendFile(path.join(__dirname, 'views', 'indexOld.html'));
+// });
 
 
 cloudApp.get('/login.do', function(req, res){
