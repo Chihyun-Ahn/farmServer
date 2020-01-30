@@ -15,25 +15,8 @@
 						alert('아이디, 또는 비밀번호를 입력해주세요.');
 					}else{
 						$('#myForm').submit();
-						// var data = {id: id, pw: password};
-						// $.post('/loginClick.do', data, function(fetchedData){
-						// 	if(fetchedData == 'No id' || fetchedData == 'Wrong password'){
-						// 		alert('아이디, 또는 비밀번호가 일치하지 않습니다.');
-						// 	}else if(fetchedData == 'Error. etc.'){
-						// 		alert('fetchedData: 시스템에러. mariadbConn.js 확인');
-						// 	}else if(fetchedData == 'clear'){
-						// 		console.log(id);
-
-						// 		$.get('/ddd.do', {id: id});
-						// 		$.get(fogAddress+'/redirecttorealdata.do', {id: id});
-						// 	}
-						// console.log('Back..');
-						// )};
 					}
 				});
-				// $('#submitBtn2').click(function(){
-				// 	$('#testForm').submit();
-				// });
 			});
 		</script>
 	</head>
@@ -52,15 +35,6 @@
 				<input type="text" id="password" class="fadeIn third" name="password" placeholder="비밀번호">
 				<input type="button" id="submitBtn" class="fadeIn fourth" value="로그인">
 			  </form>
-
-			  <!-- <form action="/setData.do" method="post" id="testForm" name="testForm">		  
-				<label for="house1TarTemp">목표온도</label>
-				<input id="house1TarTemp" name="house1TarTemp" type="text">
-		
-				<label for="house1TempBand">온도편차</label>
-				<input id="house1TempBand" name="house1TempBand" type="text">		
-			  <button type="button" id="submitBtn2">확인</button>
-			</form> -->
 			</div>
 		  </div>
 	</body>
