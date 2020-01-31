@@ -11,24 +11,24 @@ DROP TABLE House2;
 
 CREATE TABLE House1(
     num         	INT PRIMARY KEY AUTO_INCREMENT,
-    curTime         TIMESTAMP DEFAULT NOW(),
-    msgTime         VARCHAR(25),
-    tarTemp	        DECIMAL(4,1),
-    tempBand	    DECIMAL(3,1),
-    ventilPer	    DECIMAL(4,1),
+    msgID           VARCHAR(15),
+    edgeDepTime     VARCHAR(10),
+    fogArrTime      VARCHAR(10), 
+    fogDepTime      VARCHAR(10),
+    cloudArrTime    VARCHAR(10),
     avgTemp         DECIMAL(4,1),
-    avgHumid        DECIMAL(4,1)
+    avgHumid         DECIMAL(4,1)
 );
 
 CREATE TABLE House2(
     num         	INT PRIMARY KEY AUTO_INCREMENT,
-    curTime         TIMESTAMP DEFAULT NOW(),
-    msgTime         VARCHAR(25),
-    tarTemp	        DECIMAL(4,1),
-    tempBand	    DECIMAL(3,1),
-    ventilPer	    DECIMAL(4,1),
+    msgID           VARCHAR(15),
+    edgeDepTime     VARCHAR(10),
+    fogArrTime      VARCHAR(10), 
+    fogDepTime      VARCHAR(10),
+    cloudArrTime    VARCHAR(10),
     avgTemp         DECIMAL(4,1),
-    avgHumid        DECIMAL(4,1)
+    avgHumid         DECIMAL(4,1)
 );
 
 CREATE TABLE identification(
@@ -69,4 +69,12 @@ SELECT * FROM House1 ORDER BY num LIMIT 1;
 
 DELETE FROM House1;
 ALTER TABLE House1 AUTO_INCREMENT=1;
+
+클라우드 서버. 있어야 되는 것. 
+1. 사용자 테이블
+2. house1, House2
+ house1,2에는?
+ 1시간 간격의 데이터가 저장된다. 
+ num, msgID, edgeDepTime, fogArrTime, fogDepTime, cloudArrTime, 평균 온도, 평균 습도 
+
 

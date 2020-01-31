@@ -1,19 +1,47 @@
+//###########################################################################################
+//#####################################초기화################################################
+
 const express = require('express');
 const cors = require('cors');
-var path = require('path');
-var bodyParser = require('body-parser');
+const path = require('path');
+const bodyParser = require('body-parser');
 const cloudApp = express();
-var dbConn = require('./mariadbConn');
-var timeConv = require('./timeConvert');
-var portNum = 5000;
+const dbConn = require('./mariadbConn');
+const timeConv = require('./timeConvert');
+const portNum = 5000;
+const fogAddress = 'http://223.194.33.67:10033';
+
+const interServerSocketIO = require('socket.io-client');
+var interServerSocket = interServerSocketIO(fogAddress);
+
 var dataBean = require('./dataBean');
-var fogAddress = 'http://223.194.33.67:10033';
+var currentUser = 'none';
 
 cloudApp.use(bodyParser.json());
 cloudApp.use(bodyParser.urlencoded({extended: true}));
 cloudApp.use(express.static('views/cssAndpics'));
+cloudApp.use('/socket.io', express.static('node_modules/socket.io'));
 cloudApp.use(cors());
 
+//UI용 소켓 만들기
+var http = require('http').Server(cloudApp);
+var io = require('socket.io')(http);
+// var socketGlobal = 'none';
+
+//###########################################################################################
+//###################################서버 간 소켓 통신#######################################
+
+interServerSocket.emit('haha', {user: 'chihyun'});
+interServerSocket.on('answer', function(data){
+    console.log(data.answer);
+});
+interServerSocket.on('house1Msg', function(data){
+    console.log('House1MsgTime received.');
+    // console.log(data.);
+});
+
+//###########################################################################################
+//#################################http GET, POST 통신#######################################
 cloudApp.get('/', function(req, res){
     console.log('This is the home address.');
     console.log('Redirecting to the login page.');
@@ -23,6 +51,13 @@ cloudApp.get('/', function(req, res){
 cloudApp.get('/login.do', function(req, res){
     console.log('Entered login page.');
     res.sendFile(path.join(__dirname, 'views', 'index.html'));
+});
+
+cloudApp.get('/pastdatapage.do', function(req, res){
+    console.log('cloudApp.get: pastdatapage.do received.');
+    currentUser = req.query.user;
+    console.log('User: '+currentUser);
+    res.sendFile(path.join(__dirname, 'views', 'pastdatapage.html'));
 });
 
 cloudApp.post('/loginClick.do', function(req, res){
@@ -48,7 +83,20 @@ cloudApp.post('/setData.do', function(req, res){
     res.redirect(fogAddress+'/realdata.do');
 });
 
-cloudApp.listen(portNum, function(){
+//http 리스너
+http.listen(portNum, function(){
     console.log('Listening on port: '+portNum);
 });
 
+//###########################################################################################
+//#########################################소켓통신##########################################
+io.on('connection', function(socket){
+    socketGlobal = socket;
+    console.log('Socket.io: connected.');
+    socket.on('disconnect', function(){
+        console.log('User '+currentUser+' disconnected.');
+    });
+    socket.on('pastdataInitials', function(){
+        socket.emit('currentUser', currentUser);
+    });
+});

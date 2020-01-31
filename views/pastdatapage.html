@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>과거 데이터</title>
+  <meta charset="UTF-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+  <script src="https://www.chartjs.org/samples/latest/utils.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="pastdatapage.css" >
+
+  <script>
+    var socket = io();
+    var currentUser;
+    var edgeServerAddress = 'http://223.194.33.67:10033';
+    $(document).ready(function(){
+        socket.emit('pastdataInitials');
+        socket.on('currentUser', function(data){
+            currentUser = data;
+            $('#currentUser').html(currentUser+'님 농장');
+
+            $('#realtimepage').attr('href', edgeServerAddress+'/realdata.do?user='+currentUser);
+
+            $('#pastdatapage').attr('href', './pastdatapage.do?user='+currentUser);
+            $('#controlpage').attr('href', edgeServerAddress+'/controlpage.do?user='+currentUser);
+            $('#loginpage').attr('href', './login.do');
+        });
+    });
+  </script>
+</head>
+<!-- ####################문서 바디 시작#################### -->
+<!-- ####################문서 바디 시작#################### -->
+<body>	
+  <div class="topnav">
+    <a id="realtimepage" href="#">REAL-TIME화면</a>  
+    <a id="pastdatapage" class="active" href="#">과거데이터</a>  
+    <a id="controlpage" href="#">제어화면</a>  
+    <a id="loginpage" href="#">로그인화면</a>  
+  </div>
+  <div class="currentUser" id="currentUser">--</div>
+  
+</body>
+</html>
