@@ -31,6 +31,22 @@ CREATE TABLE House2(
     avgHumid         DECIMAL(4,1)
 );
 
+INSERT INTO House1(
+    msgID, edgeDepTime, fogArrTime, fogDepTime, 
+    cloudArrTime, avgTemp, avgHumid
+) VALUES(
+    'h1200131000000', 100000000, 100000000, 100000000,
+    100000000, 99, 99
+);
+
+INSERT INTO House2(
+    msgID, edgeDepTime, fogArrTime, fogDepTime, 
+    cloudArrTime, avgTemp, avgHumid
+) VALUES(
+    'h2200131000000', 100000000, 100000000, 100000000,
+    100000000, 99, 99
+);
+
 CREATE TABLE identification(
     num         	INT PRIMARY KEY AUTO_INCREMENT,
     id              VARCHAR(25),
