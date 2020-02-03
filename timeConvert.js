@@ -100,6 +100,15 @@ function millToTime(miltime){
     return result;
 }
 
+function msgIDToMilli(msgid){
+    var timeString = '20'+msgid.substr(2,2)+'-'+msgid.substr(4,2)+
+        '-'+msgid.substr(6,2)+'T'+msgid.substr(8,2)+
+        ':'+msgid.substr(10,2)+':'+msgid.substr(12,2);
+    var timeMilli = Date.parse(timeString);
+    return timeMilli;
+}
+
+
 
 module.exports = {
     convertToTime: convertToTime,
@@ -108,5 +117,6 @@ module.exports = {
     getYearMonthDate: getYearMonthDate,
     nowMilli: nowMilli,
     convertToMilli: convertToMilli,
-    millToTime: millToTime
+    millToTime: millToTime,
+    msgIDToMilli:msgIDToMilli
 }

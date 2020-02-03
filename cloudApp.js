@@ -14,12 +14,7 @@ const fogAddress = 'http://223.194.33.67:10033';
 const interServerSocketIO = require('socket.io-client');
 var interServerSocket = interServerSocketIO(fogAddress);
 
-var dataBean = require('./dataBean');
 var currentUser = 'none';
-
-var timeDiff = [0,0,0,0,0,0,0,0,0,0]; //For time synching
-var timeDiffSum = 0;
-var timeDiffAvg = 0;
 
 cloudApp.use(bodyParser.json());
 cloudApp.use(bodyParser.urlencoded({extended: true}));
@@ -30,67 +25,30 @@ cloudApp.use(cors());
 //UI용 소켓 만들기
 var http = require('http').Server(cloudApp);
 var io = require('socket.io')(http);
-// var socketGlobal = 'none';
-
-//###########################################################################################
-//###################################Time sync###############################################
-var time1, time2, rtt, oneWayDelay, fogRcvTime, estimatedFogTime, timeDiffImsi, IDNum, IDNumRcv;
-setInterval(function(){
-    IDNum = parseInt(Math.random()*1000);
-    time1 = timeGetter.nowMilli();
-    interServerSocket.emit('cloudTimeSyncReq', IDNum);
-    console.log('IDNum sent: '+IDNum);
-},4500);
-
-interServerSocket.on('cloudTimeSyncRes',function(data){
-    time2 = timeGetter.nowMilli();
-    IDNumRcv = data.IDNum;
-    console.log('IDNum received: '+IDNumRcv);
-    if(IDNum == IDNumRcv){
-        fogRcvTime = data.fogTime;
-        rtt = time2 - time1;
-        onwWayDelay = Math.round(rtt / 2.0);
-        estimatedFogTime = time1 + onwWayDelay;
-        timeDiffImsi = estimatedFogTime - fogRcvTime;    
-
-        for(i=0;i<timeDiff.length;i++){
-            if(i!=timeDiff.length-1){
-                timeDiff[i] = timeDiff[i+1];
-            }else if(i==timeDiff.length-1){
-                timeDiff[i] = timeDiffImsi;
-            }
-        }
-        timeDiffSum = 0;
-        for(i=0;i<timeDiff.length;i++){
-        timeDiffSum += timeDiff[i];
-        }
-        timeDiffAvg = Math.round((timeDiffSum/(1.0*timeDiff.length)));
-        console.log('Departure time: '+time1+' Arrival time: '+time2+' oneWayDelay: '+oneWayDelay);
-        console.log('Fog received time: '+fogRcvTime+' Estimated fog rcv time: '+estimatedFogTime);
-        console.log('Time difference: '+timeDiffImsi+' timeDiffSum: '+timeDiffSum+' timeDiff: '+timeDiff+' timeDiffAvg: '+timeDiffAvg);
-    }else{
-        console.log('TimeSync: idNum is different.');
-    }
-});
 
 //###########################################################################################
 //###################################서버 간 소켓 통신#######################################
 
 interServerSocket.on('house1Msg', function(databean){
-    var cloudArrTimeMilli = timeGetter.nowMilli() + timeDiffAvg;
-    databean.house[0].cloudArrTime = timeGetter.millToTime(cloudArrTimeMilli);
-    console.log('house1Msg received.');
-    var msgID = databean.house[0].msgID;
-    var msgID4Digits = msgID.substr(10,4);
-    var msgIDLast, msgIDLast4Digits, saveParam;
+    var fogDepTime = timeGetter.convertToMilli(databean.house[0].fogDepTime);
+    var imsiData = {msgID: databean.house[0].msgID, fogDepTime: fogDepTime};
+    interServerSocket.emit('house1SyncReqFromCloud', imsiData);
+    console.log('house1Msg received. msgID: '+databean.house[0].msgID);
+});
+
+interServerSocket.on('house1SyncResFromFog', function(databean){
+    console.log('house1SyncResFromFog has arrived. ');
+    var msgID = timeGetter.msgIDToMilli(databean.house[0].msgID);
+    var msgIDLast, saveParam;
+    // DB 가장 최근 데이터와 시간 차이를 계산, 600초(10분)이상 차이 난다면 저장. 
     dbConn.getTheLastRow('house1').catch(
         (err)=>{console.log(err);}
     ).then(
         (result)=>{
-            msgIDLast = result[0].msgID;
-            msgIDLast4Digits = msgIDLast.substr(10,4);
-            saveParam = msgID4Digits - msgIDLast4Digits;
-            if(saveParam>=600){
+            msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
+            saveParam = msgID - msgIDLast;
+            if(saveParam>=600000){
+                socketGlobal.emit('cloudMsg', databean);
                 dbConn.insertDataToCloud(databean, 'house1');
             }
         }
@@ -98,19 +56,24 @@ interServerSocket.on('house1Msg', function(databean){
 });
 
 interServerSocket.on('house2Msg', function(databean){
-    databean.house[1].cloudArrTime = timeGetter.now();
-    console.log('house2Msg received.');
-    var msgID = databean.house[1].msgID;
-    var msgID4Digits = msgID.substr(10,4);
-    var msgIDLast, msgIDLast4Digits, saveParam;
+    var fogDepTime = timeGetter.convertToMilli(databean.house[1].fogDepTime);
+    var imsiData = {msgID: databean.house[1].msgID, fogDepTime: fogDepTime};
+    interServerSocket.emit('house2SyncReqFromCloud', imsiData);
+    console.log('house2Msg received. msgID: '+databean.house[1].msgID);
+});
+
+interServerSocket.on('house2SyncResFromFog', function(databean){
+    console.log('house2SyncResFromFog has arrived. ');
+    var msgID = timeGetter.msgIDToMilli(databean.house[1].msgID);
+    var msgIDLast, saveParam;
+    // DB 가장 최근 데이터와 시간 차이를 계산, 600초(10분)이상 차이 난다면 저장. 
     dbConn.getTheLastRow('house2').catch(
         (err)=>{console.log(err);}
     ).then(
         (result)=>{
-            msgIDLast = result[0].msgID;
-            msgIDLast4Digits = msgIDLast.substr(10,4);
-            saveParam = msgID4Digits - msgIDLast4Digits;
-            if(saveParam>=600){
+            msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
+            saveParam = msgID - msgIDLast;
+            if(saveParam>=600000){
                 dbConn.insertDataToCloud(databean, 'house2');
             }
         }
@@ -173,7 +136,7 @@ io.on('connection', function(socket){
     socket.on('disconnect', function(){
         console.log('User '+currentUser+' disconnected.');
     });
-    socket.on('pastdataInitials', function(){
-        socket.emit('currentUser', currentUser);
+    socket.on('pastGraphDataReq', function(){
+        socket.emit('pastGraphDataRes', currentUser);
     });
 });

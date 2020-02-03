@@ -15,8 +15,8 @@
     var currentUser;
     var edgeServerAddress = 'http://223.194.33.67:10033';
     $(document).ready(function(){
-        socket.emit('pastdataInitials');
-        socket.on('currentUser', function(data){
+        socket.emit('pastGraphDataReq');
+        socket.on('pastGraphDataRes', function(data){
             currentUser = data;
             $('#currentUser').html(currentUser+'님 농장');
 
