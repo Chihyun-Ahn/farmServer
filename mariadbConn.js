@@ -103,7 +103,7 @@ async function getTheLastRow(house){
         console.log(err);
     }finally{
         if(conn) conn.end();
-        console.log('mariadbConn.js: getTheLastRow: msgID: '+result[0].msgID);
+        // console.log('mariadbConn.js: getTheLastRow: msgID: '+result[0].msgID);
         return result;
     }
 }
@@ -169,12 +169,42 @@ async function insertData(dataBean){
     }
 }
 
+async function getGraphDataset(house){    
+    let conn, result;
+    var sql = 'SELECT * FROM '+house+' ORDER BY num DESC LIMIT 100';
+    try{
+        conn = await pool.getConnection();
+        await conn.query('Use farmData');
+        result = await conn.query(sql);
+    }catch(err){
+        console.log(err);
+    }finally{
+        if(conn) conn.end();
+        return result; 
+    }
+}
 
+async function getLast5Data(house){
+    let conn, result;
+    var sql = 'SELECT msgID, avgTemp, avgHumid FROM '+house+' ORDER BY num DESC LIMIT 5';
+    try{
+        conn = await pool.getConnection();
+        await conn.query('Use farmData');
+        result = await conn.query(sql);
+    }catch(err){
+        console.log(err);
+    }finally{
+        if(conn) conn.end();
+        return result;
+    }
+}
 
 module.exports = {
     insertData: insertData,
     selectData: selectData,
     loginQuery: loginQuery,
     getTheLastRow: getTheLastRow,
-    insertDataToCloud: insertDataToCloud
+    insertDataToCloud: insertDataToCloud,
+    getGraphDataset:getGraphDataset,
+    getLast5Data:getLast5Data
 };

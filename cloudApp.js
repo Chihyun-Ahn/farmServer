@@ -47,8 +47,8 @@ interServerSocket.on('house1SyncResFromFog', function(databean){
         (result)=>{
             msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
             saveParam = msgID - msgIDLast;
-            if(saveParam>=600000){
-                socketGlobal.emit('cloudMsg', databean);
+            if(saveParam>=60000){
+                // socketGlobal.emit('cloudMsg', databean);
                 dbConn.insertDataToCloud(databean, 'house1');
             }
         }
@@ -96,7 +96,7 @@ cloudApp.get('/login.do', function(req, res){
 cloudApp.get('/pastdatapage.do', function(req, res){
     console.log('cloudApp.get: pastdatapage.do received.');
     currentUser = req.query.user;
-    console.log('User: '+currentUser);
+    console.log('pastdatapage.do: currentUser: '+currentUser);
     res.sendFile(path.join(__dirname, 'views', 'pastdatapage.html'));
 });
 
@@ -104,7 +104,7 @@ cloudApp.post('/loginClick.do', function(req, res){
     console.log('Log-in button was clicked.');
     var id = req.body.logID;
     var pw = req.body.password;
-    console.log('id: '+id, 'pw: '+pw);
+    var userLoginClickTime = req.body.userLoginClickTime;
     console.log(req.body);
 
     dbConn.loginQuery(id, pw).then(function(resultValue){
@@ -113,7 +113,7 @@ cloudApp.post('/loginClick.do', function(req, res){
             res.sendFile(path.join(__dirname, 'views', 'index.html'));
         }else{
             console.log(resultValue.id+'님 환영합니다. ');
-            res.redirect(fogAddress+'/realdata.do?user='+resultValue.id);
+            res.redirect(fogAddress+'/realdata.do?user='+resultValue.id+'&userLoginClickTime='+userLoginClickTime);
         }
     });
 });
@@ -129,14 +129,28 @@ http.listen(portNum, function(){
 });
 
 //###########################################################################################
-//#########################################소켓통신##########################################
+//################################User와 소켓통신##########################################
 io.on('connection', function(socket){
+    console.log('Socket connected with user.');
     socketGlobal = socket;
-    console.log('Socket.io: connected.');
     socket.on('disconnect', function(){
         console.log('User '+currentUser+' disconnected.');
     });
-    socket.on('pastGraphDataReq', function(){
-        socket.emit('pastGraphDataRes', currentUser);
+    socket.on('userWho', function(){
+        socket.emit('currentUserIs', currentUser);
+    });
+    socket.on('pastGraphDataReq', function(houseName){
+        dbConn.getGraphDataset(houseName)
+        .catch((err)=>{console.log(err);})
+        .then((result)=>{
+            socket.emit('pastGraphDataRes', {result, houseName});
+        });
+    });
+    socket.on('last5DataReq', function(houseName){
+        dbConn.getLast5Data(houseName)
+        .catch((err)=>{console.log(err);})
+        .then((result)=>{
+            socket.emit('last5DataRes', {result, houseName});
+        });
     });
 });
