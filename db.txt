@@ -93,6 +93,76 @@ ALTER TABLE House1 AUTO_INCREMENT=1;
  1시간 간격의 데이터가 저장된다. 
  num, msgID, edgeDepTime, fogArrTime, fogDepTime, cloudArrTime, 평균 온도, 평균 습도 
 
+// cloudOnly server의 데이터 베이스
+
+CREATE TABLE house1CloudOnly(
+    num         	INT PRIMARY KEY AUTO_INCREMENT,
+    msgID           VARCHAR(15),
+    edgeDepTime     VARCHAR(10),
+    fogArrTime      VARCHAR(10),
+    fogDepTime      VARCHAR(10),
+    userArrTime     VARCHAR(10),
+    tarTemp	        DECIMAL(4,1),
+    tempBand	    DECIMAL(3,1),
+    ventilPer	    DECIMAL(4,1),
+    temp1	       	DECIMAL(4,1),
+    temp2	       	DECIMAL(4,1),
+    temp3	       	DECIMAL(4,1),
+    temp4	       	DECIMAL(4,1),
+    temp5	       	DECIMAL(4,1),
+    temp6	       	DECIMAL(4,1),
+    humid1       	DECIMAL(4,1),
+    humid2       	DECIMAL(4,1),
+    humid3       	DECIMAL(4,1),
+    humid4       	DECIMAL(4,1),
+    humid5       	DECIMAL(4,1),
+    humid6       	DECIMAL(4,1),
+    fanMode	        TINYINT(1),
+    fan1		    TINYINT(1),
+    fan2		    TINYINT(1),
+    fan3		    TINYINT(1),
+    waterMode	    TINYINT(1),
+    water		    TINYINT(1),
+    alarm		    TINYINT(1)
+);
+
+ALTER TABLE house1CloudOnly ADD COLUMN cloudArrTime VARCHAR(10) AFTER fogDepTime;
+
+CREATE TABLE house2CloudOnly(
+    num         	INT PRIMARY KEY AUTO_INCREMENT,
+    msgID           VARCHAR(15),
+    edgeDepTime     VARCHAR(10),
+    fogArrTime      VARCHAR(10),
+    fogDepTime      VARCHAR(10),
+    userArrTime     VARCHAR(10),
+    tarTemp	        DECIMAL(4,1),
+    tempBand	    DECIMAL(3,1),
+    ventilPer	    DECIMAL(4,1),
+    temp1	       	DECIMAL(4,1),
+    temp2	       	DECIMAL(4,1),
+    temp3	       	DECIMAL(4,1),
+    temp4	       	DECIMAL(4,1),
+    temp5	       	DECIMAL(4,1),
+    temp6	       	DECIMAL(4,1),
+    humid1       	DECIMAL(4,1),
+    humid2       	DECIMAL(4,1),
+    humid3       	DECIMAL(4,1),
+    humid4       	DECIMAL(4,1),
+    humid5       	DECIMAL(4,1),
+    humid6       	DECIMAL(4,1),
+    fanMode	        TINYINT(1),
+    fan1		    TINYINT(1),
+    fan2		    TINYINT(1),
+    fan3		    TINYINT(1),
+    waterMode	    TINYINT(1),
+    water		    TINYINT(1),
+    alarm		    TINYINT(1)
+);
+
+ALTER TABLE house2CloudOnly ADD COLUMN cloudArrTime VARCHAR(10) AFTER fogDepTime;
+
+
+##################################################
 Cloud 데이터베이스의 Pseudo data.
 
 INSERT INTO House1(msgID, edgeDepTime, fogArrTime, fogDepTime, cloudArrTime, avgTemp, avgHumid) VALUES('h1200203211057',205727089,205727094,205727099,205727119,27.1,14.4);
