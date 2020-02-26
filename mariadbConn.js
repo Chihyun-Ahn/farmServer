@@ -169,9 +169,44 @@ async function insertData(dataBean){
     }
 }
 
+async function insertUserArrTimeCloudOnly(msgid, userarrtime){
+    var houseName = 'house' + msgid[1]+'CloudOnly';
+    console.log('mariadbConn.js: houseName: '+houseName);
+    var msgID = msgid;
+    var userArrTime = userarrtime;
+    let conn;
+    try{
+        conn = await pool.getConnection();
+        conn.query('Use farmData');
+        var sql = 'UPDATE '+houseName+' SET userArrTime = ? WHERE msgID = ?';
+        conn.query(sql, [userArrTime, msgID]);
+    }catch(err){
+        console.log(err);
+    }finally{
+        if(conn) conn.end();
+    }
+}
+
 async function getGraphDataset(house){    
     let conn, result;
     var sql = 'SELECT * FROM '+house+' ORDER BY num DESC LIMIT 100';
+    try{
+        conn = await pool.getConnection();
+        await conn.query('Use farmData');
+        result = await conn.query(sql);
+    }catch(err){
+        console.log(err);
+    }finally{
+        if(conn) conn.end();
+        return result; 
+    }
+}
+
+//Cloud 시스템 용
+async function getGraphDatasetCloudOnly(house){    
+    var houseName = house + 'CloudOnly';
+    let conn, result;
+    var sql = 'SELECT * FROM '+houseName+' ORDER BY num DESC LIMIT 100';
     try{
         conn = await pool.getConnection();
         await conn.query('Use farmData');
@@ -199,6 +234,50 @@ async function getLast5Data(house){
     }
 }
 
+async function insertDataCloudOnly(dataBean, houseName){
+    var houseNum = houseName[5]*1 -1;
+    let conn;
+    var sql1 = 'INSERT INTO house1CloudOnly(msgID, edgeDepTime, fogArrTime, fogDepTime, '+
+        'cloudArrTime, tarTemp, tempBand, ventilPer, temp1, temp2, temp3, '+
+        'temp4, temp5, temp6, humid1, humid2, humid3, humid4, humid5, humid6, '+
+        'fanMode, fan1, fan2, fan3, waterMode, water, alarm) '+
+        'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
+        var sql2 = 'INSERT INTO house2CloudOnly(msgID, edgeDepTime, fogArrTime, fogDepTime, '+
+        'cloudArrTime, tarTemp, tempBand, ventilPer, temp1, temp2, temp3, '+
+        'temp4, temp5, temp6, humid1, humid2, humid3, humid4, humid5, humid6, '+
+        'fanMode, fan1, fan2, fan3, waterMode, water, alarm) '+
+        'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';    
+    var sql = [sql1, sql2];
+    try{
+        conn = await pool.getConnection();
+        conn.query('Use farmData');
+        conn.query(sql[houseNum],
+            [
+                dataBean.house[houseNum].msgID,        dataBean.house[houseNum].edgeDepTime, 
+                dataBean.house[houseNum].fogArrTime,   dataBean.house[houseNum].fogDepTime,
+                dataBean.house[houseNum].cloudArrTime,  dataBean.house[houseNum].tarTemp,
+                dataBean.house[houseNum].tempBand,     dataBean.house[houseNum].ventilPer,
+                dataBean.house[houseNum].temp[0],      dataBean.house[houseNum].temp[1],
+                dataBean.house[houseNum].temp[2],      dataBean.house[houseNum].temp[3],
+                dataBean.house[houseNum].temp[4],      dataBean.house[houseNum].temp[5],
+                dataBean.house[houseNum].humid[0],     dataBean.house[houseNum].humid[1],
+                dataBean.house[houseNum].humid[2],     dataBean.house[houseNum].humid[3],
+                dataBean.house[houseNum].humid[4],     dataBean.house[houseNum].humid[5],
+                dataBean.house[houseNum].fanMode,      dataBean.house[houseNum].fan[0],
+                dataBean.house[houseNum].fan[1],       dataBean.house[houseNum].fan[2],
+                dataBean.house[houseNum].waterMode,    dataBean.house[houseNum].water,
+                dataBean.house[houseNum].alarm
+            ]
+        );
+    }catch(err){
+        console.log(err);
+    }finally{
+        if(conn) conn.end();
+    }
+}
+
+
+
 module.exports = {
     insertData: insertData,
     selectData: selectData,
@@ -206,5 +285,8 @@ module.exports = {
     getTheLastRow: getTheLastRow,
     insertDataToCloud: insertDataToCloud,
     getGraphDataset:getGraphDataset,
-    getLast5Data:getLast5Data
+    getLast5Data:getLast5Data,
+    insertDataCloudOnly:insertDataCloudOnly,
+    getGraphDatasetCloudOnly:getGraphDatasetCloudOnly,
+    insertUserArrTimeCloudOnly:insertUserArrTimeCloudOnly
 };

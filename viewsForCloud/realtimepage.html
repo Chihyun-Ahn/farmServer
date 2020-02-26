@@ -11,7 +11,7 @@
   <link rel="stylesheet" type="text/css" href="realtimepage.css" >
 
   <script>
-    var cloudServerAddress = 'http://223.194.33.67:10004';
+    // var cloudServerAddress = 'http://223.194.33.67:10004';
     var socket = io();
     var currentUser, userReqTime, userResTime;
     const onOffString = ['OFF', 'ON'];
@@ -28,8 +28,10 @@
       socket.on('house1GraphDataRes', function(data){
         currentUser = data.currentUser;
         userReqTime = data.userReqTime;
-        var loginResTime = convertToMilli(userResTime)-convertToMilli(userReqTime);
-        console.log('Login response time: '+loginResTime);
+        if(userReqTime != 'none'){
+          var loginResTime = convertToMilli(userResTime)-convertToMilli(userReqTime);
+          console.log('Login response time: '+loginResTime);
+        }
         
         $('#realtimepage').attr("href", './realdata.do?user='+currentUser);
         $('#pastdatapage').attr("href", './pastdatapage.do?user='+currentUser);
@@ -44,9 +46,10 @@
         var dataSet = data.result;        
         makeGraph('house2', dataSet);
       });
-      socket.on('house1Msg', function(dataBean){
+      socket.on('house1MsgToUser', function(dataBean){
         socket.emit('userArrTimeHouse1', dataBean.house[0].msgID);
         console.log('House1 msg has arrived.');
+        console.log('house1 msg, dataBean.house[0].temp[0]:'+dataBean.house[0].temp[0]);
         $('#h1t1').html(dataBean.house[0].temp[0]);
         $('#h1t2').html(dataBean.house[0].temp[1]);
         $('#h1t3').html(dataBean.house[0].temp[2]);
@@ -78,7 +81,7 @@
 
 
       });
-      socket.on('house2Msg', function(dataBean){
+      socket.on('house2MsgToUser', function(dataBean){
         socket.emit('userArrTimeHouse2', dataBean.house[1].msgID);
         console.log('House2 msg has arrived.');
         $('#h2t1').html(dataBean.house[1].temp[0]);

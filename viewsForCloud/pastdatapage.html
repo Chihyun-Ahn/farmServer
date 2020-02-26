@@ -13,16 +13,15 @@
   <script>
     var socket = io();
     var currentUser;
-    var edgeServerAddress = 'http://223.194.33.67:10033';
 
     $(document).ready(function(){
       socket.emit('userWho');
       socket.on('currentUserIs', function(user){
         currentUser = user;
         $('#currentUser').html(currentUser+'님 농장');
-        $('#realtimepage').attr('href', edgeServerAddress+'/realdata.do?user='+currentUser);
+        $('#realtimepage').attr('href', './realdata.do?user='+currentUser);
         $('#pastdatapage').attr('href', './pastdatapage.do?user='+currentUser);
-        $('#controlpage').attr('href', edgeServerAddress+'/controlpage.do?user='+currentUser);
+        $('#controlpage').attr('href', './controlpage.do?user='+currentUser);
         $('#loginpage').attr('href', './login.do');
       });
 

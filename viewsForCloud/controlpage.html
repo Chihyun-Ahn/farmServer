@@ -16,7 +16,7 @@
 
     $(document).ready(function(){
       socket.emit('userWho');
-      socket.on('userIs', (user)=>{
+      socket.on('currentUserIs', (user)=>{
         currentUser = user;
         $('#realtimepage').attr("href", './realdata.do?user='+currentUser);
         $('#pastdatapage').attr("href", './pastdatapage.do?user='+currentUser);

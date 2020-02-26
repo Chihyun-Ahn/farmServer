@@ -13,11 +13,14 @@ const fogAddress = 'http://223.194.33.67:10033';
 const interServerSocketIO = require('socket.io-client');
 var interServerSocket = interServerSocketIO(fogAddress);
 
+// 기타 전역 변수 모음
 var currentUser = 'none';
+var userReqTime = 0;
+var dataBeanGlobal = 'none';
 
 cloudOnlyApp.use(bodyParser.json());
 cloudOnlyApp.use(bodyParser.urlencoded({extended: true}));
-cloudOnlyApp.use(express.static('views/cssAndpics'));
+cloudOnlyApp.use(express.static('viewsForCloud/cssAndpics'));
 cloudOnlyApp.use('/socket.io', express.static('node_modules/socket.io'));
 
 //UI용 소켓 만들기
@@ -37,22 +40,14 @@ interServerSocket.on('house1Msg', function(databean){
 
 interServerSocket.on('house1SyncResFromFog', function(databean){
     console.log('house1SyncResFromFog has arrived. ');
-    var msgID = timeGetter.msgIDToMilli(databean.house[0].msgID);
-    var msgIDLast, saveParam;
-    
-    // // DB 가장 최근 데이터와 시간 차이를 계산, 600초(10분)이상 차이 난다면 저장. 
-    // dbConn.getTheLastRow('house1').catch(
-    //     (err)=>{console.log(err);}
-    // ).then(
-    //     (result)=>{
-    //         msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
-    //         saveParam = msgID - msgIDLast;
-    //         if(saveParam>=60000){
-    //             // socketGlobal.emit('cloudMsg', databean);
-    //             dbConn.insertDataToCloud(databean, 'house1');
-    //         }
-    //     }
-    // );
+    dbConn.insertDataCloudOnly(databean, 'house1').catch((err)=>{console.log(err);});
+    if(socketGlobal!='none'){
+        dataBeanGlobal = databean;
+        databean.house[0].cloudDepTime = timeGetter.now();
+        socketGlobal.emit('house1MsgToUser',databean);
+    }else if(socketGlobal=='none'){
+        console.log('house1SyncResFromFog::socketGlobal not connected. ');
+    }
 });
 
 interServerSocket.on('house2Msg', function(databean){
@@ -64,20 +59,14 @@ interServerSocket.on('house2Msg', function(databean){
 
 interServerSocket.on('house2SyncResFromFog', function(databean){
     console.log('house2SyncResFromFog has arrived. ');
-    var msgID = timeGetter.msgIDToMilli(databean.house[1].msgID);
-    var msgIDLast, saveParam;
-    // DB 가장 최근 데이터와 시간 차이를 계산, 600초(10분)이상 차이 난다면 저장. 
-    dbConn.getTheLastRow('house2').catch(
-        (err)=>{console.log(err);}
-    ).then(
-        (result)=>{
-            msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
-            saveParam = msgID - msgIDLast;
-            if(saveParam>=600000){
-                dbConn.insertDataToCloud(databean, 'house2');
-            }
-        }
-    );
+    dbConn.insertDataCloudOnly(databean, 'house2').catch((err)=>{console.log(err);});
+    if(socketGlobal!='none'){
+        dataBeanGlobal = databean;
+        databean.house[1].cloudDepTime = timeGetter.now();
+        socketGlobal.emit('house2MsgToUser',databean);
+    }else if(socketGlobal=='none'){
+        console.log('house2SyncResFromFog::socketGlobal not connected.');
+    }
 });
 
 //###########################################################################################
@@ -92,13 +81,6 @@ cloudOnlyApp.get('/login.do', function(req, res){
     console.log('Entered login page.');
     res.sendFile(path.join(__dirname, 'viewsForCloud', 'index.html'));
 });
-
-// cloudOnlyApp.get('/pastdatapage.do', function(req, res){
-//     console.log('cloudOnlyApp.get: pastdatapage.do received.');
-//     currentUser = req.query.user;
-//     console.log('pastdatapage.do: currentUser: '+currentUser);
-//     res.sendFile(path.join(__dirname, 'views', 'pastdatapage.html'));
-// });
 
 cloudOnlyApp.post('/loginClick.do', function(req, res){
     console.log('Log-in button was clicked.');
@@ -119,14 +101,27 @@ cloudOnlyApp.post('/loginClick.do', function(req, res){
 });
 
 cloudOnlyApp.get('/realdata.do', function(req, res){
-    // console.log('/realdata.do: '+req.query.user);
     currentUser = req.query.user;
-    userReqTime = req.query.userLoginClickTime;
+    if(req.query.userLoginClickTime != null){
+        userReqTime = req.query.userLoginClickTime;    
+    }else if(req.query.userLoginClickTime == null){
+        userReqTime = 'none';
+    }
     res.sendFile(path.join(__dirname,'viewsForCloud','realtimepage.html'));
 });
 
+cloudOnlyApp.get('/pastdatapage.do', function(req, res){
+    console.log('cloudApp.get: pastdatapage.do received.');
+    currentUser = req.query.user;
+    console.log('pastdatapage.do: currentUser: '+currentUser);
+    res.sendFile(path.join(__dirname, 'viewsForCloud', 'pastdatapage.html'));
+});
 
-
+cloudOnlyApp.get('/controlpage.do', function(req, res){
+    console.log('/controlpage.do: '+req.query.user);
+    currentUser = req.query.user;
+    res.sendFile(path.join(__dirname,'viewsForCloud','controlpage.html'));
+});
 
 cloudOnlyApp.post('/setData.do', function(req, res){
     console.log('setData.do. requested.');
@@ -150,7 +145,7 @@ io.on('connection', function(socket){
         socket.emit('currentUserIs', currentUser);
     });
     socket.on('house1GraphDataReq', function(){
-        dbConn.getGraphDataset('house1').catch(
+        dbConn.getGraphDatasetCloudOnly('house1').catch(
             (err)=>{console.log(err);}
         ).then(
             (result)=>{
@@ -160,7 +155,7 @@ io.on('connection', function(socket){
     });
 
     socket.on('house2GraphDataReq', function(){
-        dbConn.getGraphDataset('house2').catch(
+        dbConn.getGraphDatasetCloudOnly('house2').catch(
             (err)=>{console.log(err);}
         ).then(
             (result)=>{
@@ -189,5 +184,31 @@ io.on('connection', function(socket){
     });
     socket.on('pastPageUserReq', function(pastPageUserReqTime){
         socket.emit('pastPageUserRes', pastPageUserReqTime);
+    });
+    socket.on('userArrTimeHouse1', function(msgid){
+        if(msgid == dataBeanGlobal.house[0].msgID){
+            var userToCloudArrTimeMilli = timeGetter.nowMilli();
+            var cloudDepTimeMilli = timeGetter.convertToMilli(dataBeanGlobal.house[0].cloudDepTime);
+            var rtt = userToCloudArrTimeMilli - cloudDepTimeMilli;
+            var oneWayDelay = Math.round(rtt / 2.0);
+            var estimatedUserArrTime = cloudDepTimeMilli + oneWayDelay;
+            dataBeanGlobal.house[0].userArrTime = timeGetter.millToTime(estimatedUserArrTime);
+            dbConn.insertUserArrTimeCloudOnly(msgid, dataBeanGlobal.house[0].userArrTime).catch((err)=>{console.log(err);})
+        }else if(msgid != dataBeanGlobal.house[0].msgID){
+            console.log('userArrTimeHouse1:: msgid does not match dataBeanGlobal msgID');
+        }
+    });
+    socket.on('userArrTimeHouse2', function(msgid){
+        if(msgid == dataBeanGlobal.house[1].msgID){
+            var userToCloudArrTimeMilli = timeGetter.nowMilli();
+            var cloudDepTimeMilli = timeGetter.convertToMilli(dataBeanGlobal.house[1].cloudDepTime);
+            var rtt = userToCloudArrTimeMilli - cloudDepTimeMilli;
+            var oneWayDelay = Math.round(rtt / 2.0);
+            var estimatedUserArrTime = cloudDepTimeMilli + oneWayDelay;
+            dataBeanGlobal.house[1].userArrTime = timeGetter.millToTime(estimatedUserArrTime);
+            dbConn.insertUserArrTimeCloudOnly(msgid, dataBeanGlobal.house[1].userArrTime).catch((err)=>{console.log(err);})
+        }else if(msgid != dataBeanGlobal.house[1].msgID){
+            console.log('userArrTimeHouse2:: msgid does not match dataBeanGlobal msgID');
+        }
     });
 });
