@@ -10,6 +10,7 @@ const timeGetter = require('./timeConvert');
 const portNum = 5000;
 const fogAddress = 'http://223.194.33.67:10033';
 
+
 const interServerSocketIO = require('socket.io-client');
 var interServerSocket = interServerSocketIO(fogAddress);
 
@@ -40,7 +41,6 @@ interServerSocket.on('house1Msg', function(databean){
 
 interServerSocket.on('house1SyncResFromFog', function(databean){
     console.log('house1SyncResFromFog has arrived. ');
-    dbConn.insertDataCloudOnly(databean, 'house1').catch((err)=>{console.log(err);});
     if(socketGlobal!='none'){
         dataBeanGlobal = databean;
         databean.house[0].cloudDepTime = timeGetter.now();
@@ -48,6 +48,22 @@ interServerSocket.on('house1SyncResFromFog', function(databean){
     }else if(socketGlobal=='none'){
         console.log('house1SyncResFromFog::socketGlobal not connected. ');
     }
+    var msgID = timeGetter.msgIDToMilli(databean.house[0].msgID);
+    var msgIDLast, saveParam;
+    // 일단 모든 데이터는 house1CloudOnly에 저장. (촘촘히 저장)
+    dbConn.insertDataCloudOnly(databean, 'house1').catch((err)=>{console.log(err);});
+    // 과거 데이터에 house1 테이블에 저장. 
+    dbConn.getTheLastRow('house1').catch(
+        (err)=>{console.log(err);}
+    ).then(
+        (result)=>{
+            msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
+            saveParam = msgID - msgIDLast;
+            if(saveParam>=60000){
+                dbConn.insertDataToCloud(databean, 'house1');
+            }
+        }
+    );
 });
 
 interServerSocket.on('house2Msg', function(databean){
@@ -59,14 +75,29 @@ interServerSocket.on('house2Msg', function(databean){
 
 interServerSocket.on('house2SyncResFromFog', function(databean){
     console.log('house2SyncResFromFog has arrived. ');
-    dbConn.insertDataCloudOnly(databean, 'house2').catch((err)=>{console.log(err);});
     if(socketGlobal!='none'){
         dataBeanGlobal = databean;
-        databean.house[1].cloudDepTime = timeGetter.now();
+        databean.house[0].cloudDepTime = timeGetter.now();
         socketGlobal.emit('house2MsgToUser',databean);
     }else if(socketGlobal=='none'){
-        console.log('house2SyncResFromFog::socketGlobal not connected.');
+        console.log('house2SyncResFromFog::socketGlobal not connected. ');
     }
+    var msgID = timeGetter.msgIDToMilli(databean.house[1].msgID);
+    var msgIDLast, saveParam;
+    // 일단 모든 데이터는 house1CloudOnly에 저장. (촘촘히 저장)
+    dbConn.insertDataCloudOnly(databean, 'house2').catch((err)=>{console.log(err);});
+    // 과거 데이터에 house1 테이블에 저장. 
+    dbConn.getTheLastRow('house2').catch(
+        (err)=>{console.log(err);}
+    ).then(
+        (result)=>{
+            msgIDLast = timeGetter.msgIDToMilli(result[0].msgID);
+            saveParam = msgID - msgIDLast;
+            if(saveParam>=60000){
+                dbConn.insertDataToCloud(databean, 'house2');
+            }
+        }
+    );
 });
 
 //###########################################################################################
